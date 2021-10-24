@@ -1,0 +1,47 @@
+ping
+set BOOK 1
+get BOOK
+GET A
+GET B
+GET C
+GET D
+GET E
+GET F
+GET G
+GET R
+GET Z
+GET
+HMSET
+HMSET pessoas joão "tudo bem man"
+HMGET pessoas
+HMGET pessoas joão
+HMSET pessoas joão "teste" n"
+HMSET pessoas joão "teste"
+HMGET pessoas joão
+help
+help HMSET
+HMGET pessoas joão
+help HMSET "teste" "oi" "ui"
+HMGET pessoas joão
+HMSET "teste" "oi" "ui"
+HMGET pessoas joão
+HMSET pessoas joão "TESTE" "oi" "ui"
+HMGET pessoas joão
+RPUSH joão "oi"
+RPUSH joão "adeus"
+LRANGE joão
+LRANGE joão 0 -1
+RPUSH joão "adeusssss"
+LRANGE joão 0 -1
+RPUSH aa 1 2 3
+GET aa
+LRANGE aa 0 -1
+RPUSH aa ""
+LRANGE aa 0 -1
+flushdb
+LRANGE ricardorz23 0 -1
+GET A
+GET AWDWDW
+GET user123
+LRANGE user123 0 -1
+LRANGE user456 0 -1
