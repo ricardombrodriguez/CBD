@@ -1,22 +1,35 @@
 package com.names.app;
 
+import redis.clients.jedis.Jedis;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Autocomplete 
 {
+
+    private Jedis jedis;
+
+    public Autocomplete() {
+        this.jedis = new Jedis("localhost");
+    }
+
+    public List<String> getNames() {
+        return jedis.lrange("NAMES", 0, -1);
+    }
+
     public static void main( String[] args )
     {
-    
-        ArrayList<String> names = new ArrayList<>();
+
+        Autocomplete au = new Autocomplete();
 
         try {
             Scanner sc = new Scanner(new File("./names.txt"));
             while (sc.hasNextLine()) {
                String name = sc.nextLine();
-               names.add(name);
+               au.jedis.rpush("NAMES",name);
             }
             sc.close();
 
@@ -26,7 +39,7 @@ public class Autocomplete
 
             ArrayList<String> autocomplete = new ArrayList<>();
 
-            for (String n : names)  {
+            for (String n : au.getNames())  {
                 if (n.startsWith(input)) {
                     autocomplete.add(n);
                 }
