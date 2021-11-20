@@ -13,6 +13,8 @@ import static com.mongodb.client.model.Filters.*;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+// alínea b)
+
 public class Indices {
     
     public static void main(String[] args) {

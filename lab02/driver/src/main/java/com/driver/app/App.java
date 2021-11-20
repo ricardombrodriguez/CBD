@@ -14,10 +14,7 @@ import static com.mongodb.client.model.Filters.*;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-/**
- * Alínea A)
- *
- */
+// alínea a)
 
 public class App 
 {
