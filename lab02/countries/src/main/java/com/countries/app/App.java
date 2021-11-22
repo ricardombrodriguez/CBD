@@ -1,5 +1,7 @@
 package com.countries.app;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -9,6 +11,8 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.Sorts;
 
@@ -31,10 +35,10 @@ public class App
 
         System.out.println();
 
-        System.out.println("Listar o nome de todos os países no mundo que usam o Euro (EUR) como moeda:");
+        System.out.println("Listar o nome, região, subregião, coordenadas e moeda de todos os países no mundo que usam o Euro (EUR) como moeda:");
 
         try {
-            FindIterable<Document> query = collection.find(eq("currency", "EUR")).projection(Projections.fields(Projections.exclude("_id"),Projections.include("name.common"), Projections.include("latlng"), Projections.include("region"), Projections.include("subregion")));
+            FindIterable<Document> query = collection.find(eq("currency", "EUR")).projection(Projections.fields(Projections.exclude("_id"),Projections.include("currency"),Projections.include("name.common"), Projections.include("latlng"), Projections.include("region"), Projections.include("subregion")));
             for (Document document : query) {
                 System.out.println(document.toJson());
             }
@@ -130,25 +134,14 @@ public class App
 
 
 
-
-
-
-
         // aggregates:
 
 
-
-
-
-
-
-
-        // este usa o aggregate
-        // https://stackoverflow.com/questions/21387969/mongodb-count-the-number-of-items-in-an-array
-        System.out.println("Listar o nome, área, países fronteiriços, região e subregião dos 10 países no mundo com maior número de países fronteiriços, por ordem decrescente:");
+        System.out.println("Conte o número de países existentes por sub-região, por ordem crescente de contagem:");
 
         try {
-            FindIterable<Document> query = collection.find(eq("currency", "EUR")).projection(Projections.fields(Projections.exclude("_id"),Projections.include("name.common"), Projections.include("area"), Projections.include("borders"), Projections.include("region"), Projections.include("subregion"))).sort(Sorts.descending("borders")).limit(10);
+            AggregateIterable<Document> query = collection.aggregate(Arrays.asList(group("$subregion", Accumulators.sum("Countries", 1)),
+                                                                                    Aggregates.sort(Sorts.ascending("Countries"))));
             for (Document document : query) {
                 System.out.println(document.toJson());
             }
@@ -160,6 +153,104 @@ public class App
         System.out.println();
         System.out.println();
 
+
+        System.out.println("Conte o número de países por moeda, por ordem decrescente de contagem:");
+
+        try {
+            AggregateIterable<Document> query = collection.aggregate(Arrays.asList(
+                Aggregates.unwind("$currency"),
+                Aggregates.group("$currency", Accumulators.sum("Countries", 1)),
+                Aggregates.sort(Sorts.descending("Countries"))));
+            for (Document document : query) {
+                System.out.println(document.toJson());
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+        System.out.println();
+        System.out.println();
+        System.out.println();
+
+
+
+        System.out.println("Conte o número de países situados na região de 'Africa' com longitude inferior a 30 por idioma falado:");
+
+        try {
+            AggregateIterable<Document> query = collection.aggregate(Arrays.asList(
+                Aggregates.match(Filters.and(Filters.eq("region","Africa"),Filters.lt("latlng.1",30))),
+                Aggregates.project(Projections.computed("languages", eq("$objectToArray", "$languages"))),
+                Aggregates.unwind("$languages"),
+                Aggregates.group("$languages", Accumulators.sum("Countries", 1))));
+            for (Document document : query) {
+                System.out.println(document.toJson());
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+        System.out.println();
+        System.out.println();
+        System.out.println();
+
+
+        System.out.println("Listar o nome/sigla dos 10 países no mundo com maior número de países vizinhos, apresentando também a contagem por ordem decrescente:");
+        try {
+            AggregateIterable<Document> query = collection.aggregate(Arrays.asList(
+                Aggregates.unwind("$borders"),
+                Aggregates.group("$borders", Accumulators.sum("Neighbor countries", 1)),
+                Aggregates.sort(Sorts.descending("Neighbor countries")),
+                Aggregates.limit(10)
+            ));
+            for (Document document : query) {
+                System.out.println(document.toJson());
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+        System.out.println();
+        System.out.println();
+        System.out.println();
+
+
+        System.out.println("Conte o número de países pertencentes à região da 'Asia' cuja área é superior ou igual a 50000, agrupados por subregião e ordenados de forma decrescente:");
+        try {
+            AggregateIterable<Document> query = collection.aggregate(Arrays.asList(
+                Aggregates.match(Filters.and(Filters.eq("region","Asia"),Filters.gte("area",50000))),
+                Aggregates.group("$subregion", Accumulators.sum("Countries", 1)),
+                Aggregates.sort(Sorts.descending("Countries"))
+            ));
+            for (Document document : query) {
+                System.out.println(document.toJson());
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+        System.out.println();
+        System.out.println();
+        System.out.println();
+
+
+
+        System.out.println("Listar o nome, área, coordenadas e moeda de todos os países que não tem como moeda 'USD' ou 'EUR e com área inferior a 10000, por ordem crescente de área:");
+        try {
+            AggregateIterable<Document> query = collection.aggregate(Arrays.asList(
+                Aggregates.project(Projections.fields(Projections.excludeId(),Projections.include("translations.por.common"),Projections.include("area"),Projections.include("latlng"),Projections.include("currency"))),
+                Aggregates.match(Filters.and(Filters.nin("currency",Arrays.asList("USD","EUR")),Filters.lt("area",10000))),
+                Aggregates.sort(Sorts.ascending("area"))
+            ));
+            for (Document document : query) {
+                System.out.println(document.toJson());
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+        System.out.println();
+        System.out.println();
+        System.out.println();
 
 
 
