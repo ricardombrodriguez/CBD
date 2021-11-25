@@ -1,0 +1,162 @@
+LAB03 - Cassandra 
+
+Se correr isto:
+
+cqlsh> CREATE KEYSPACE Keyspace name
+   ... WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 3};
+SyntaxException: line 1:16 no viable alternative at input 'Keyspace' (CREATE KEYSPACE [Keyspace]...)
+cqlsh> CREATE KEYSPACE tutorialspoint WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 3};
+
+Warnings :
+Your replication factor 3 for keyspace tutorialspoint is higher than the number of nodes 1
+
+Temos este aviso em cima. O factor de replicação não pode ser maior do que o número de nós que temos, que atualmente é só um (o meu próprio computador/nó, presumo).
+Assim, fazemos:
+
+cqlsh> DROP KEYSPACE tutorialspoint;
+cqlsh> CREATE KEYSPACE tutorialspoint WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 1};
+
+Agora corre sem problemas...
+
+cqlsh:tutorialspoint>; CREATE TABLE emp(
+   emp_id int PRIMARY KEY,
+   emp_name text,
+   emp_city text,
+   emp_sal varint,
+   emp_phone varint
+   );
+
+cqlsh:teste> insert into emp(emp_id,emp_name,emp_city,emp_sal,emp_phone) values (1,'Cristiano Ronaldo','Madeira',10900000,969696966);
+cqlsh:teste> insert into emp(emp_id,emp_name,emp_city,emp_sal,emp_phone) values (2,'Johnny Macarrão','Aveiro',1000,926926926);
+cqlsh:teste> insert into emp(emp_id,emp_name,emp_city,emp_sal,emp_phone) values (3,'Alexey Serras','Aveiro',1400,976076076);
+cqlsh:teste> select * from emp;
+
+cqlsh:tutorialspoint> select * from emp;
+
+ emp_id | emp_city | emp_name          | emp_phone | emp_sal
+--------+----------+-------------------+-----------+----------
+      1 |  Madeira | Cristiano Ronaldo | 969696966 | 10900000
+      2 |   Aveiro |   Johnny Macarrão | 926926926 |     1000
+      3 |   Aveiro |     Alexey Serras | 976076076 |     1400
+
+(3 rows)
+
+
+Podemos, tal como no SQL server, alterar a estrutura de uma tabela... Exemplo: adicionar um novo campo:
+
+cqlsh:tutorialspoint> ALTER TABLE emp
+   ... ADD emp_email text;
+
+
+Ou, por exemplo, eliminar o mesmo campo:
+
+cqlsh:tutorialspoint> ALTER TABLE emp DROP emp_email;
+
+
+Em vez de eliminar uma tabela, podemos simplesmente apagar os dados/rows com o comando TRUNCATE.
+
+cqlsh:tutorialspoint> TRUNCATE emp;
+
+
+Podemos criar um index: 
+
+cqlsh:tutorialspoint> CREATE INDEX name ON emp (emp_name);
+
+
+Ou eliminar o mesmo:
+
+cqlsh:tutorialspoint> DROP INDEX name;
+
+
+Temos outra funcionalidade que é poder usar o batch para correr um determinado script (podemos realizar várias operações CRUD, por exemplo).
+
+BEGIN BATCH
+<insert-stmt>/ <update-stmt>/ <delete-stmt>
+APPLY BATCH
+
+
+A inserção de dados, que já apareceu anteriormente, é igual ao SQL.
+
+
+Para fazer update de dados:
+
+cqlsh:tutorialspoint> UPDATE emp SET emp_city='Delhi',emp_sal=50000 WHERE emp_id=2;
+cqlsh:tutorialspoint> SELECT * FROM emp;
+
+ emp_id | emp_city | emp_name          | emp_phone | emp_sal
+--------+----------+-------------------+-----------+----------
+      1 |  Madeira | Cristiano Ronaldo | 969696966 | 10900000
+      2 |    Delhi |   Johnny Macarrão | 926926926 |    50000
+      3 |   Aveiro |     Alexey Serras | 976076076 |     1400
+
+(3 rows)
+
+
+Para ler todos os dados, podemos usar o SELECT * FROM [table].
+Para apresentar apenas alguns campos, usamos projeção:
+
+cqlsh:tutorialspoint> SELECT emp_name, emp_sal from emp;
+
+ emp_name          | emp_sal
+-------------------+----------
+ Cristiano Ronaldo | 10900000
+   Johnny Macarrão |    50000
+     Alexey Serras |     1400
+
+(3 rows)
+
+cqlsh:tutorialspoint> SELECT * FROM emp WHERE emp_sal = 50000;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
+
+Como não temos index no atributo 'emp_sal' e este não faz parte da primary key, o select dá erro.
+
+Neste exemplo do baeldung.com:
+
+CREATE TABLE application_logs (
+  id                    INT,
+  app_name              VARCHAR,
+  hostname              VARCHAR,
+  log_datetime          TIMESTAMP,
+  env                   VARCHAR,
+  log_level             VARCHAR,
+  log_message           TEXT,
+  PRIMARY KEY ((app_name, env), hostname, log_datetime)
+);
+
+A primary key contem os atributos 'app_name', 'env', 'hostname' e 'log_datetime'. A partition key contém 'app_name' e 'env'. Ou seja, a partition key tem de estar sempre envolvida no WHERE clause.
+Se quisermos procurar pelo atributo 'log_datetime', temos primeiro de incluir toda a partition key (uma vez que precisamos desta totalmente para calcular a hash) e depois incluir todos os parâmetros da clustered key que vem antes dele (neste caso o 'hostname).
+
+Contudo, podemos adicionar indíces a clustered keys, por exemplo, e depois só pesquisar por esse campo.
+
+
+Para eliminar campos de rows, podemos fazer:
+
+cqlsh:tutorialspoint> DELETE emp_sal FROM emp WHERE emp_id=3;
+cqlsh:tutorialspoint> SELECT * FROM emp;
+
+ emp_id | emp_city | emp_name          | emp_phone | emp_sal
+--------+----------+-------------------+-----------+----------
+      1 |  Madeira | Cristiano Ronaldo | 969696966 | 10900000
+      2 |    Delhi |   Johnny Macarrão | 926926926 |    50000
+      3 |   Aveiro |     Alexey Serras | 976076076 |     null
+
+(3 rows)
+
+Ou apagar toda a row..
+
+cqlsh:tutorialspoint> DELETE FROM emp WHERE emp_id=3;
+cqlsh:tutorialspoint> SELECT * FROM emp;
+
+ emp_id | emp_city | emp_name          | emp_phone | emp_sal
+--------+----------+-------------------+-----------+----------
+      1 |  Madeira | Cristiano Ronaldo | 969696966 | 10900000
+      2 |    Delhi |   Johnny Macarrão | 926926926 |    50000
+
+(2 rows)
+
+Tipos de dados no CQL datatypes:
+https://www.tutorialspoint.com/cassandra/cassandra_cql_datatypes.htm
+
+CQL coleções:
+https://www.tutorialspoint.com/cassandra/cassandra_cql_collections.htm
+
