@@ -160,3 +160,17 @@ https://www.tutorialspoint.com/cassandra/cassandra_cql_datatypes.htm
 CQL coleções:
 https://www.tutorialspoint.com/cassandra/cassandra_cql_collections.htm
 
+Time-to-live:
+
+insert into emp(emp_id,emp_name,emp_city,emp_sal,emp_phone) values (3,'Alexey Serras','Aveiro',1400,976076076) USING TTL 172800;
+
+Este comando define o tempo de duração em segundos até aos valores serem expirados.
+
+SELECT TTL emp_name
+from emp 
+WHERE emp_id = 3; 
+
+O output será igual ao tempo que falta até ser expirado. Ou seja, deve ser menor do que 172800.
+
+
+
