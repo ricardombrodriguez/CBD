@@ -47,12 +47,12 @@ CREATE TABLE video_followers (
    );
    
  CREATE TABLE video_events (
-   uid uuid PRIMARY KEY,
    user VARCHAR,
    video uuid,
    action VARCHAR,
    created_at timestamp,
-   video_time timestamp
+   video_time timestamp,
+   PRIMARY KEY ((user,video),created_at)
    );
 
  CREATE TABLE video_rating (
@@ -63,6 +63,8 @@ CREATE TABLE video_followers (
    );
   
   
+CREATE INDEX ON videos(tags);
+
 -- INSERTS
 insert into users (username, name, email, created_at) values ('cmenchenton0', 'Cyril Menchenton', 'cmenchenton0@jugem.jp', dateof(now()));
 insert into users (username, name, email, created_at) values ('pkettles1', 'Patti Kettles', 'pkettles1@msn.com', dateof(now()));
@@ -87,10 +89,10 @@ insert into users (username, name, email, created_at) values ('gmacgiollaj', 'Go
 
 insert into videos (uid, author , name, description, video_duration, tags, created_at) values (uuid(), 'rtunnicliff8', 'Raven, cape', '714qXK3m50z75o03JCw78G7k1414vr', 12m1s, {'cats'}, dateof(now()));
 insert into videos (uid, author , name, description, video_duration, tags, created_at) values (uuid(), 'cmenchenton0', 'Topi', 'iSH55WUw74UvZ18cq9236uP66f1x60', 1h12m04s, {'educational','cbd'}, dateof(now()));
-insert into videos (uid, author , name, description, video_duration, tags, created_at) values (uuid(), 'gbonelleg', 'Long-crested hawk eagle', 'Dt7cVG6AD9V2L3u7g716H8E4z9D0D6', 13m04s, {'dogs'}, dateof(now()));
+insert into videos (uid, author , name, description, video_duration, tags, created_at) values (uuid(), 'gbonelleg', 'Long-crested hawk eagle', 'Dt7cVG6AD9V2L3u7g716H8E4z9D0D6', 13m04s, {'dogs','Aveiro'}, dateof(now()));
 insert into videos (uid, author , name, description, video_duration, tags, created_at) values (uuid(), 'acollumbellf', 'Insect, stick', 'O93NJ5Z4g0va28jY4yya4y075H5687', 0h02m34s, {'cats'}, dateof(now()));
 insert into videos (uid, author , name, description, video_duration, tags, created_at) values (uuid(), 'ematthiesen6', 'Turkey, common', 'x94LAG3bP2649613oz5B19UO146p3x', 1h53m02s, {'educational'}, dateof(now()));
-insert into videos (uid, author , name, description, video_duration, tags, created_at) values (uuid(), 'whofton3', 'Bear, american black', 'oO66Al08Rz3Gh2633yRf9NSAGD1362', 53m12s, {'educational','sio'}, dateof(now()));
+insert into videos (uid, author , name, description, video_duration, tags, created_at) values (uuid(), 'whofton3', 'Bear, american black', 'oO66Al08Rz3Gh2633yRf9NSAGD1362', 53m12s, {'Aveiro','sio'}, dateof(now()));
 insert into videos (uid, author , name, description, video_duration, tags, created_at) values (uuid(), 'gmacgiollaj', 'Brush-tailed rat kangaroo', '2oka79Qk335kt22086vo1Fa206I49J', 12m04s, {'educational'}, dateof(now()));
 insert into videos (uid, author , name, description, video_duration, tags, created_at) values (uuid(), 'mizkoveski4', 'Boa, columbian rainbow', '3MBf9337s44tO7rF7g4o6lVylMj98h', 12m04s, {'sports'}, dateof(now()));
 insert into videos (uid, author , name, description, video_duration, tags, created_at) values (uuid(), 'adowdelld', 'Southern boubou', 'E7uh020f91y40Hk6o588rlVo9R6109', 43s, {'cats'}, dateof(now()));
@@ -114,10 +116,10 @@ insert into comments_videos (uid, video, author, comment, created_at) values (uu
 insert into comments_videos (uid, video, author, comment, created_at) values (uuid(), 1cbf0aeb-7a4f-47c9-9250-42a38896b98a,'adowdelld', 'Like!', dateof(now()));
 insert into comments_videos (uid, video, author, comment, created_at) values (uuid(), 813024e1-3535-4240-ab66-383b42a00ebb,'swillcock2', 'Gostei da receita', dateof(now()));
 insert into comments_videos (uid, video, author, comment, created_at) values (uuid(), 1cbf0aeb-7a4f-47c9-9250-42a38896b98a,'swillcock2', 'niceeee', dateof(now()));
-insert into comments_users (uid, video, author, comment, created_at) values (uuid(), e9e20c0d-49ab-4c62-9fa2-94c717f81a3b,'swillcock2', 'muito bom', dateof(now()));
-insert into comments_users (uid, video, author, comment, created_at) values (uuid(), e9e20c0d-49ab-4c62-9fa2-94c717f81a3b,'swillcock2', 'repito, muito bom', dateof(now()));
-insert into comments_users (uid, video, author, comment, created_at) values (uuid(), 1cbf0aeb-7a4f-47c9-9250-42a38896b98a,'adowdelld', 'xpto!', dateof(now()));
-insert into comments_users (uid, video, author, comment, created_at) values (uuid(), 1cbf0aeb-7a4f-47c9-9250-42a38896b98a,'mizkoveski4', 'Top', dateof(now()));
+insert into comments_videos (uid, video, author, comment, created_at) values (uuid(), e9e20c0d-49ab-4c62-9fa2-94c717f81a3b,'swillcock2', 'muito bom', dateof(now()));
+insert into comments_videos (uid, video, author, comment, created_at) values (uuid(), e9e20c0d-49ab-4c62-9fa2-94c717f81a3b,'swillcock2', 'repito, muito bom', dateof(now()));
+insert into comments_videos (uid, video, author, comment, created_at) values (uuid(), 1cbf0aeb-7a4f-47c9-9250-42a38896b98a,'adowdelld', 'xpto!', dateof(now()));
+insert into comments_videos (uid, video, author, comment, created_at) values (uuid(), 1cbf0aeb-7a4f-47c9-9250-42a38896b98a,'mizkoveski4', 'Top', dateof(now()));
 
 insert into video_followers (video, users) values (8aa97887-e604-4fda-8ebb-0be80e4c008e, {'pkettles1','abridgemane'});
 insert into video_followers (video, users) values (c02f54b5-0be7-43e9-a6f9-1eae1aa02e26, {'kgreenrdea','gmacgiollaj','gbonelleg'});
@@ -132,12 +134,16 @@ insert into video_followers (video, users) values (09085621-7c78-4f4d-be02-66d53
 insert into video_followers (video, users) values (7eac5a51-4798-401b-bef3-ff37902f54b9, {'etunnicliffei'});
 
 
-insert into video_events (uid, user, video, action, created_at, video_time) values (uuid(), 'swillcock2',813024e1-3535-4240-ab66-383b42a00ebb,'Pause',dateof(now()), 123000);
-insert into video_events (uid, user, video, action, created_at, video_time) values (uuid(), 'swillcock2',c01cdc84-9737-4af4-b10d-28b65a101772,'Play',dateof(now()), 320000);
-insert into video_events (uid, user, video, action, created_at, video_time) values (uuid(), 'adowdelld',e9e20c0d-49ab-4c62-9fa2-94c717f81a3b,'Skip 10 seconds',dateof(now()), 500000);
-insert into video_events (uid, user, video, action, created_at, video_time) values (uuid(), 'etunnicliffei',0ead4af7-460e-4f60-90d6-66ae8525bd80,'Pause',dateof(now()), 400000);
-insert into video_events (uid, user, video, action, created_at, video_time) values (uuid(), 'etunnicliffei',c01cdc84-9737-4af4-b10d-28b65a101772,'Play',dateof(now()), 100000);
-insert into video_events (uid, user, video, action, created_at, video_time) values (uuid(), 'kgreenrdea',c02f54b5-0be7-43e9-a6f9-1eae1aa02e26,'Skip 5 seconds',dateof(now()), 300000);
+insert into video_events (user, video, action, created_at, video_time) values ('swillcock2',813024e1-3535-4240-ab66-383b42a00ebb,'Pause',dateof(now()), 123000);
+insert into video_events (user, video, action, created_at, video_time) values ('swillcock2',c01cdc84-9737-4af4-b10d-28b65a101772,'Play',dateof(now()), 320000);
+insert into video_events (user, video, action, created_at, video_time) values ('adowdelld',e9e20c0d-49ab-4c62-9fa2-94c717f81a3b,'Skip 10 seconds',dateof(now()), 500000);
+insert into video_events (user, video, action, created_at, video_time) values ('etunnicliffei',0ead4af7-460e-4f60-90d6-66ae8525bd80,'Pause',dateof(now()), 400000);
+insert into video_events (user, video, action, created_at, video_time) values ('etunnicliffei',c01cdc84-9737-4af4-b10d-28b65a101772,'Play',dateof(now()), 100000);
+insert into video_events (user, video, action, created_at, video_time) values ('kgreenrdea',c02f54b5-0be7-43e9-a6f9-1eae1aa02e26,'Stop',dateof(now()), 10000);
+insert into video_events (user, video, action, created_at, video_time) values ('kgreenrdea',c02f54b5-0be7-43e9-a6f9-1eae1aa02e26,'Play',dateof(now()), 10000);
+insert into video_events (user, video, action, created_at, video_time) values ('kgreenrdea',c02f54b5-0be7-43e9-a6f9-1eae1aa02e26,'Skip 5 seconds',dateof(now()), 200000);
+insert into video_events (user, video, action, created_at, video_time) values ('kgreenrdea',c02f54b5-0be7-43e9-a6f9-1eae1aa02e26,'Skip 5 seconds',dateof(now()), 200500);
+insert into video_events (user, video, action, created_at, video_time) values ('kgreenrdea',c02f54b5-0be7-43e9-a6f9-1eae1aa02e26,'Skip 5 seconds',dateof(now()), 201000);
 
 
 insert into video_rating (uid, rating, video) values (uuid(), 4, 813024e1-3535-4240-ab66-383b42a00ebb);
@@ -169,3 +175,14 @@ SELECT * FROM comments_videos WHERE video = e9e20c0d-49ab-4c62-9fa2-94c717f81a3b
 SELECT COUNT(video) AS "Votes", AVG(rating) AS "Average Rating" FROM video_rating WHERE video = 813024e1-3535-4240-ab66-383b42a00ebb;
 SELECT COUNT(video) AS "Votes", AVG(rating) AS "Average Rating" FROM video_rating WHERE video = c01cdc84-9737-4af4-b10d-28b65a101772;
 SELECT COUNT(video) AS "Votes", AVG(rating) AS "Average Rating" FROM video_rating WHERE video = 0ead4af7-460e-4f60-90d6-66ae8525bd80;
+
+
+SELECT * FROM comments_videos WHERE video = 1cbf0aeb-7a4f-47c9-9250-42a38896b98a LIMIT 3;
+
+SELECT tags FROM videos WHERE author = 'whofton3' AND created_at = '2021-12-09 10:30:24.199000+0000';
+
+SELECT * FROM videos WHERE author = 'whofton3' AND created_at = '2021-12-09 10:30:24.199000+0000';
+
+SELECT * FROM videos WHERE tags CONTAINS 'Aveiro';
+
+SELECT * FROM video_events WHERE user = 'kgreenrdea' AND video = c02f54b5-0be7-43e9-a6f9-1eae1aa02e26;
