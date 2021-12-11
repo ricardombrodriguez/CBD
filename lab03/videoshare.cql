@@ -20,8 +20,8 @@ CREATE TABLE users (
    video_duration duration,
    tags set<text>,
    created_at timestamp,
-   PRIMARY KEY (author,created_at)
-  );
+   PRIMARY KEY ((author),created_at)
+  ) WITH CLUSTERING ORDER BY (created_at DESC);  
    
  CREATE TABLE comments_users (
    uid uuid,
@@ -99,6 +99,8 @@ insert into videos (uid, author , name, description, video_duration, tags, creat
 insert into videos (uid, author , name, description, video_duration, tags, created_at) values (uuid(), 'etunnicliffei', 'Bat, madagascar fruit', 'h0oZnK0or11Bd38N94ZF0110SEf3yG', 12m13s, {'games'}, dateof(now()));
 insert into videos (uid, author , name, description, video_duration, tags, created_at) values (uuid(), 'etunnicliffei', 'Porto goals', 'Golos do porto', 14m13s, {'soccer'}, dateof(now()));
 
+-- A coluna de 'video' é o uuid() fornecido na tabela de 'videos'.
+
 insert into comments_users (uid, video, author, comment, created_at) values (uuid(), e9e20c0d-49ab-4c62-9fa2-94c717f81a3b,'abridgemane', 'Ahahah muito bom!', dateof(now()));
 insert into comments_users (uid, video, author, comment, created_at) values (uuid(), c01cdc84-9737-4af4-b10d-28b65a101772,'kgreenrdea', 'Cassandra!!!', dateof(now()));
 insert into comments_users (uid, video, author, comment, created_at) values (uuid(), c01cdc84-9737-4af4-b10d-28b65a101772,'gmacgiollaj', 'Portooo!', dateof(now()));
@@ -156,6 +158,8 @@ insert into video_rating (uid, rating, video) values (uuid(), 3, 0ead4af7-460e-4
 insert into video_rating (uid, rating, video) values (uuid(), 1, 0ead4af7-460e-4f60-90d6-66ae8525bd80);
 insert into video_rating (uid, rating, video) values (uuid(), 3, 813024e1-3535-4240-ab66-383b42a00ebb);
 insert into video_rating (uid, rating, video) values (uuid(), 4, 813024e1-3535-4240-ab66-383b42a00ebb);
+insert into video_rating (uid, rating, video) values (uuid(), 4, c02f54b5-0be7-43e9-a6f9-1eae1aa02e26);
+insert into video_rating (uid, rating, video) values (uuid(), 1, e9e20c0d-49ab-4c62-9fa2-94c717f81a3b);
 
 
 -- QUERIES
@@ -186,3 +190,27 @@ SELECT * FROM videos WHERE author = 'whofton3' AND created_at = '2021-12-09 10:3
 SELECT * FROM videos WHERE tags CONTAINS 'Aveiro';
 
 SELECT * FROM video_events WHERE user = 'kgreenrdea' AND video = c02f54b5-0be7-43e9-a6f9-1eae1aa02e26;
+
+SELECT * FROM videos WHERE author='etunnicliffei' AND created_at > '2021-12-09 10:30:24.210000+0000';
+
+-- A alínea 6 não é possível de se realizar, uma vez que a pesquisa obriga o uso da coluna 'author'. Desta forma, a apresentação de vídeos ordenados por forma decrescente de data
+-- só acontece se especificarmos o author. Isto porque a clustered key (created_at) está ordenada de forma decrescente.
+
+select users as "Followers" from video_followers WHERE video = 94e9894e-59e7-4c80-9ba3-975c053d4cd8;
+
+-- A alínea 8 não é possível (Todos os comentários (dos vídeos) que determinado utilizador está a seguir (following)).
+-- Isto porque o Cassandra não permite realizar JOINS. As bases de dados No-SQL, como o Cassandra,
+-- oferecem rapidez e escalabilidade em troca de consistência e normalização (que as bd SQL têm).
+-- O que se podia fazer era desnormalizar e ter a maior parte dos dados numa só tabela.
+
+-- A alínea 9 também não é possível de se fazer, visto que a procura na tabela video_rating envolve a primary key
+-- 'video'. Assim, só é possível procurar, por exemplo, as 5 melhores/piores reviews para um vídeo em específico,
+-- mas não é possível procurar pelos 5 melhores videos
+
+-- A alínea 10 não é possível porque temos de procurar os vídeos com a primary key ('author').
+-- Desta forma, só seria possível ordenar os vídeos de um determinado 'author' com uma clustering key como,
+-- por exemplo, o atributo created_at. Mas poderia ser outro: "description", "name", etc...
+
+-- Não é possivel visto que temos de procurar pelo 'author' primeiro. Desta forma, não é possível agrupar
+-- vídeo através das suas 'tags'.
+
