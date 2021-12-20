@@ -17,7 +17,7 @@ CREATE TABLE users (
    author VARCHAR,
    name VARCHAR,
    description VARCHAR,
-   video_duration duration,
+   video_duration int,
    tags set<text>,
    created_at timestamp,
    PRIMARY KEY ((author),created_at)
@@ -51,7 +51,7 @@ CREATE TABLE video_followers (
    video uuid,
    action VARCHAR,
    created_at timestamp,
-   video_time timestamp,
+   video_time int,
    PRIMARY KEY ((user,video),created_at)
    );
 
@@ -136,16 +136,16 @@ insert into video_followers (video, users) values (09085621-7c78-4f4d-be02-66d53
 insert into video_followers (video, users) values (7eac5a51-4798-401b-bef3-ff37902f54b9, {'etunnicliffei'});
 
 
-insert into video_events (user, video, action, created_at, video_time) values ('swillcock2',813024e1-3535-4240-ab66-383b42a00ebb,'Pause',dateof(now()), 123000);
-insert into video_events (user, video, action, created_at, video_time) values ('swillcock2',c01cdc84-9737-4af4-b10d-28b65a101772,'Play',dateof(now()), 320000);
-insert into video_events (user, video, action, created_at, video_time) values ('adowdelld',e9e20c0d-49ab-4c62-9fa2-94c717f81a3b,'Skip 10 seconds',dateof(now()), 500000);
-insert into video_events (user, video, action, created_at, video_time) values ('etunnicliffei',0ead4af7-460e-4f60-90d6-66ae8525bd80,'Pause',dateof(now()), 400000);
-insert into video_events (user, video, action, created_at, video_time) values ('etunnicliffei',c01cdc84-9737-4af4-b10d-28b65a101772,'Play',dateof(now()), 100000);
-insert into video_events (user, video, action, created_at, video_time) values ('kgreenrdea',c02f54b5-0be7-43e9-a6f9-1eae1aa02e26,'Stop',dateof(now()), 10000);
-insert into video_events (user, video, action, created_at, video_time) values ('kgreenrdea',c02f54b5-0be7-43e9-a6f9-1eae1aa02e26,'Play',dateof(now()), 10000);
-insert into video_events (user, video, action, created_at, video_time) values ('kgreenrdea',c02f54b5-0be7-43e9-a6f9-1eae1aa02e26,'Skip 5 seconds',dateof(now()), 200000);
-insert into video_events (user, video, action, created_at, video_time) values ('kgreenrdea',c02f54b5-0be7-43e9-a6f9-1eae1aa02e26,'Skip 5 seconds',dateof(now()), 200500);
-insert into video_events (user, video, action, created_at, video_time) values ('kgreenrdea',c02f54b5-0be7-43e9-a6f9-1eae1aa02e26,'Skip 5 seconds',dateof(now()), 201000);
+insert into video_events (user, video, action, created_at, video_time) values ('swillcock2',813024e1-3535-4240-ab66-383b42a00ebb,'Pause',dateof(now()), 32);
+insert into video_events (user, video, action, created_at, video_time) values ('swillcock2',c01cdc84-9737-4af4-b10d-28b65a101772,'Play',dateof(now()), 53);
+insert into video_events (user, video, action, created_at, video_time) values ('adowdelld',e9e20c0d-49ab-4c62-9fa2-94c717f81a3b,'Skip 10 seconds',dateof(now()), 23);
+insert into video_events (user, video, action, created_at, video_time) values ('etunnicliffei',0ead4af7-460e-4f60-90d6-66ae8525bd80,'Pause',dateof(now()), 341);
+insert into video_events (user, video, action, created_at, video_time) values ('etunnicliffei',c01cdc84-9737-4af4-b10d-28b65a101772,'Play',dateof(now()), 1);
+insert into video_events (user, video, action, created_at, video_time) values ('kgreenrdea',c02f54b5-0be7-43e9-a6f9-1eae1aa02e26,'Stop',dateof(now()), 2);
+insert into video_events (user, video, action, created_at, video_time) values ('kgreenrdea',c02f54b5-0be7-43e9-a6f9-1eae1aa02e26,'Play',dateof(now()), 2);
+insert into video_events (user, video, action, created_at, video_time) values ('kgreenrdea',c02f54b5-0be7-43e9-a6f9-1eae1aa02e26,'Skip 5 seconds',dateof(now()), 7);
+insert into video_events (user, video, action, created_at, video_time) values ('kgreenrdea',c02f54b5-0be7-43e9-a6f9-1eae1aa02e26,'Skip 5 seconds',dateof(now()), 12);
+insert into video_events (user, video, action, created_at, video_time) values ('kgreenrdea',c02f54b5-0be7-43e9-a6f9-1eae1aa02e26,'Skip 5 seconds',dateof(now()), 17);
 
 
 insert into video_rating (uid, rating, video) values (uuid(), 4, 813024e1-3535-4240-ab66-383b42a00ebb);
@@ -187,7 +187,7 @@ SELECT tags FROM videos WHERE author = 'whofton3' AND created_at = '2021-12-09 1
 
 SELECT * FROM videos WHERE author = 'whofton3' AND created_at = '2021-12-09 10:30:24.199000+0000';
 
-SELECT * FROM videos WHERE tags CONTAINS 'Aveiro';
+-- Não dá para procurar por tags, uma vez que tem de se procurar por um autor primeiro
 
 SELECT * FROM video_events WHERE user = 'kgreenrdea' AND video = c02f54b5-0be7-43e9-a6f9-1eae1aa02e26;
 
@@ -211,6 +211,6 @@ select users as "Followers" from video_followers WHERE video = 94e9894e-59e7-4c8
 -- Desta forma, só seria possível ordenar os vídeos de um determinado 'author' com uma clustering key como,
 -- por exemplo, o atributo created_at. Mas poderia ser outro: "description", "name", etc...
 
--- Não é possivel visto que temos de procurar pelo 'author' primeiro. Desta forma, não é possível agrupar
+-- A alínea 11 não é possivel visto que temos de procurar pelo 'author' primeiro. Desta forma, não é possível agrupar
 -- vídeo através das suas 'tags'.
 
