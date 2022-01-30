@@ -1,0 +1,91 @@
+// NMEC: 98388
+
+#1
+
+MATCH (person:Person)-[:ACTED_IN|:DIRECTED]->(movie:Movie) RETURN person.name, movie.title;
+
+#2
+
+MATCH (person:Person)-[:ACTED_IN]->(movie:Movie) WHERE movie.released > 2005 RETURN person.name, movie.title, movie.released;
+
+#3
+
+MATCH (a)-[r]-(b) WITH DISTINCT a,b,count(r) AS num_rel WHERE num_rel > 1 RETURN a,b; 
+
+#4
+
+MATCH (r1:Person)-[:REVIEWED]->(movie:Movie)<-[:REVIEWED]-(r2:Person) WHERE id(r1) > id(r2) RETURN movie.title,r1.name,r2.name
+
+#5
+
+MATCH (a1:Person)-[:ACTED_IN]->(movie:Movie)<-[:ACTED_IN]-(a2:Person) WHERE id(a1) > id(a2) WITH a1,a2,count(movie) AS num_movies WHERE num_movies > 1 RETURN num_movies,a1.name,a2.name
+
+#6
+
+MATCH (a:Person)-[:ACTED_IN]->(movie:Movie {title:"Apollo 13"}) WITH movie,avg(movie.released - a.born) AS avg_age RETURN movie.title,avg_age 
+
+#7
+
+MATCH (a:Person)-[:ACTED_IN]->(movie:Movie) WITH movie,round(avg(movie.released - a.born),2) AS avg_age RETURN movie.title,avg_age ORDER BY avg_age DESC LIMIT 10;
+
+#8
+
+MATCH (a:Person)-[:ACTED_IN]->(movie:Movie) WITH movie,round(avg(movie.released - a.born),2) AS avg_age ORDER BY avg_age ASC LIMIT 1 MATCH (a:Person)-[:ACTED_IN]->(movie) RETURN movie,a
+
+#9
+
+MATCH path = shortestPath(({name:"John Cusack"})-[*]-({name:"Demi Moore"})) RETURN path;
+
+#10
+
+MATCH path = shortestPath(({name:"Keanu Reeves"})-[*]-({name:"Tom Cruise"})) RETURN size(nodes(path));
+
+#11
+
+MATCH path = shortestPath((p1:Person)-[*]-(p2:Person)) WHERE p1.name CONTAINS "Jim" AND p2.name CONTAINS "Kevin" WITH size(nodes(path)) AS dimension ORDER BY dimension ASC LIMIT 1 RETURN dimension;
+
+#12
+
+MATCH path = shortestPath((p1:Person)-[*..2]-(jim:Person {name: "Jim Cash"})) WHERE p1 <> jim RETURN p1;
+
+#13
+
+MATCH path = shortestPath((p:Person)-[*]-(kevin:Person {name: "Kevin Bacon"})) WHERE p <> kevin WITH count(nodes(path)) AS distance ORDER BY distance DESC LIMIT 1 RETURN distance;
+
+#14
+
+MATCH path = shortestPath((p1:Person)-[*]-(p2:Person)) WHERE p1 <> p2 WITH count(nodes(path)) AS distance ORDER BY distance DESC LIMIT 1 RETURN distance;
+
+#15
+
+MATCH path = shortestPath((p1:Person)-[*]-(p2:Person)) WHERE p1 <> p2 WITH length(path) AS distance, count(*) AS pairs ORDER BY distance ASC RETURN distance, pairs;
+
+#16
+
+MATCH path = shortestPath((p:Person)-[:ACTED_IN*]-(other)) WHERE p <> other UNWIND nodes(path) AS nodes WITH p,path,COUNT(nodes) AS num_nodes RETURN p.name, avg(num_nodes) AS avg_distance ORDER BY avg_distance ASC LIMIT 10;
+
+#17 - Retorne o par de nós que tem pelo menos 3 tipos de relacionamento entre ambos.
+
+MATCH (n1)-[r]-(n2) WITH n1,n2,COUNT(r) AS num_rel WHERE num_rel >= 3 RETURN n1,n2,num_rel;
+
+#18 - Encontre as 10 pessoas com mais atuações em filmes cuja idade no ano de 2000 era inferior a 40 e retorne o seu nome e a lista de filmes em que participou.
+
+MATCH (actor:Person)-[:ACTED_IN]-(movie:Movie) WITH actor,movie,count(movie.released - actor.born < 40) AS num_movies ORDER BY num_movies DESC LIMIT 10 RETURN actor.name, collect(movie)
+
+#19 - Encontre os filmes com menor e maior avaliação por parte de reviewers, apresentando o título do filme, o nome do reviewer, o seu rating e a avaliação feita relativamente a esse filme.
+
+MATCH (reviewer:Person)-[review:REVIEWED]-(movie:Movie) WITH max(review.rating) AS max_rating, min(review.rating) AS min_rating MATCH (r:Person)-[review:REVIEWED]-(movie:Movie) WHERE review.rating = min_rating or review.rating = max_rating RETURN r.name,review.rating,review.summary,movie.title
+
+#20 - Qual é a dimensão mínima entre o diretor do filme mais antigo e do diretor filme mais recente? Apresente os nomes dos diretores e a distância mínima entre estes.
+
+MATCH (m:Movie) WITH min(m.released) AS min_released, max(m.released) AS max_released MATCH (p:Person)-[:DIRECTED]-(movie:Movie) WHERE movie.released = min_released OR movie.released = max_released WITH collect(p) AS directors UNWIND directors as d1 UNWIND directors as d2 WITH d1,d2 WHERE id(d1) > id(d2) MATCH path = shortestPath((d1)-[*]-(d2)) WITH length(path) AS distance, d1, d2 ORDER BY distance ASC LIMIT 1 RETURN d1.name,d2.name,distance;
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,38 @@
+// LAB04 - EX 3 - NMEC: 98388
+
+// import e criação de nós de diferentes tipos
+
+LOAD CSV WITH HEADERS FROM "file:///git_selection.csv" as row MERGE (person:Person {id:row.svn_id,name:row.real_name,organization:row.organization}) MERGE (project:Project {name:row.project_name,organization:row.organization}) MERGE (person)-[:COMMITED{num:row.num,role:row.role_on_project}]->(project)
+
+#1
+MATCH (n:Person) RETURN n;
+
+#2
+MATCH (n:Person) RETURN n.name;
+
+#3
+MATCH (person:Person)-[]->(project:Project) WITH count(person) AS num_person, project WHERE num_person > 1 RETURN project, num_person
+
+#4
+MATCH (person:Person)-[]->(project:Project) WITH person,count(project) AS num_projects WHERE num_projects > 1 RETURN person,num_projects
+
+#5
+MATCH (person:Person)-[]->(project:Project) WITH person,count(project) AS num_projects WHERE num_projects > 1 RETURN person, num_projects ORDER BY num_projects DESC
+
+#6
+MATCH (person:Person)-[]->(project:Project) WITH project,count(person) AS num_persons  RETURN project, num_persons
+
+#7
+MATCH (person:Person)-[r]->(project:Project) WITH r,project,count(person) AS num_persons WHERE r.role = "Committer" RETURN project, num_persons
+
+#8
+MATCH (p1:Person {id:'atm'})-[]->(project:Project)<-[]-(p2:Person) WHERE p1 <> p2 RETURN p1.name,p2.name,project.name
+
+#9
+MATCH (p1:Person {id:'atm'})-[r1]->(project:Project)<-[r2]-(p2:Person) WHERE p1 <> p2 AND r1.role = "PMC" AND r2.role = "Committer" RETURN p1.name,p2.name,project.name
+
+
+
+
+
+
